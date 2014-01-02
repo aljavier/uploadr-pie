@@ -1,0 +1,53 @@
+#!/bin/bash
+# Bash script for upload files to uploadpie.com
+# Licensed under a BSD License
+# Created by A.J.
+
+MAX_FILE_SIZE=3145728
+DURATION=1
+EXPIRE="30 Minutos"
+USER_AGENT="Mozilla/5.0 (X11; Linux x86_64; rv:26.0) Gecko/20100101 Firefox/26.0"
+
+if [[ "$#" -lt 1 ]];then
+	echo -e "\tUso: $FUNCNAME mi_archivo.ext [DURACION]\n"
+	echo -e "\tDonde DURACION es un numero del 1 al 5 (1 por defecto):\n\t1 = 30 minutos\t2 = 1 Hora\t3 = 6 Horas\t4 = 1 Día\t5 = 1 Semana\n"
+elif [[ ! -f $1 ]];then
+	echo -e "\tEl archivo $(basename "$1") no es un archivo regular\n"    
+	else
+	if [[ "$#" -gt 1 && "$2" =~ ^-?[0-9]+$ ]];then
+		case $2 in
+			2)
+				DURATION=2      # Duracion del archivo = 1 hora
+				EXPIRE="1 Hora"
+				;;
+			3)
+				DURATION=3  # Duracion del archivo = 6 horas
+				EXPIRE="6 Horas"
+				;;
+			4)
+				DURATION=4      # Duracion del archivo = 1 dia
+				EXPIRE="1 Día"
+				;;
+			5)
+				DURATION=5      # Duracion del archivo = 1 semana
+				EXPIRE="1 Semana"
+				;;
+			*)
+				# No hago nada, pues DURACION=1 por defecto, dejo esto solo por convencion
+				;;
+		esac
+	fi
+        FILE=$1
+        SIZE=$(stat "${FILE}" | grep -i size | cut -d" " -f4)
+        #TYPE=$(file "${FILE}" | cut -d" " -f2)              # No es el type en verdad, sino la extension, ver comment anterior
+		#El sitio web verifica la extension en vez del MIME Type, asi que lo comento
+        TYPE=$(echo "${FILE}" | cut -d"." -f2 | tr a-z A-Z)  # El tr es porque ya tenia el codigo de mas abajo con el tipo de file en mayusculas, me da pereza cambiarlos :|
+        echo -e "\e[1;33mFile\e[0m: $(basename "${FILE}")\t\e[1;33mSize\e[0m: $SIZE\t\e[1;33mType\e[0m: $TYPE\t\e[1;33mExpiration\e[0m: $EXPIRE\n"
+        if [[ "$TYPE" != "PNG" && "$TYPE" != "JPG" && "$TYPE" != "GIF" && "$TYPE" != "PDF" && "$TYPE" != "TXT" ]];then
+              echo -e "El tipo de archivo $TYPE no es soportado por  uploadpie.com.\n"
+        elif [[ "$SIZE" -gt "$MAX_FILE_SIZE" ]];then
+              echo -e "El archivo es demasiado grande, uploadpie.com permite un maximo de 3 mb.\n"
+        else
+              curl --progress-bar -A "$USER_AGENT" --form uploadedfile=@"$FILE" --form upload=1 --form MAX_FILE_SIZE="$MAX_FILE_SIZE"  --form expire="$DURATION" http://uploadpie.com | grep 'id="uploaded"' | cut -d'"' -f6
+        fi
+fi
