@@ -16,10 +16,10 @@ prefiero usar la terminal para la mayoria de cosas que puedo hacer porque es mas
 rapido (y porque me gusta!), asi que por eso hize este sencillo script, que posiblemente
 pueda servirle a alguien mas ahi afuera, es la razon por la cual lo comparto aqui.
 
-En lo personal uso un directorio *bin/* en mi *$HOME*, donde puedo agregar este tipo de script
+En lo personal uso un directorio **bin/** en mi **$HOME**, donde puedo agregar este tipo de script
 y demas programas creados por mi mayormente y asi poder usarlos como si estan localizados
-en */usr/local/bin* o similiar directorio. Algunas distros pueda ser que venga con ese directorio
-en el $HOME del usuario, en ese caso ellos mismos agregan ese directorio al *$PATH*, para que 
+en **/usr/local/bin** o similiar directorio. Algunas distros pueda ser que venga con ese directorio
+en el $HOME del usuario, en ese caso ellos mismos agregan ese directorio al **$PATH**, para que 
 sea posible hacer lo que dije antes, otras distros como Ubuntu segun lei y quizas Linux Mint
 una vez creas un directorio bin/ en tu $HOME e inicias sesion de nuevo en alguna terminal
 o tty agregan el bin/ al $PATH automaticamente.
@@ -28,7 +28,7 @@ En mi caso uso Arch Linux, asi que haria lo siguiente:
 
 	[yo@linux-box ~]$ mkdir bin/
 	
-Entonces lo siguiente es agregar ese directorio al $PATH, para eso abre tu archivo *.bashrc*
+Entonces lo siguiente es agregar ese directorio al $PATH, para eso abre tu archivo **.bashrc**
 con tu editor de texto favorito (vim en mi caso) y agregas esta linea:
 
 	export PATH=~/bin:"$PATH"
