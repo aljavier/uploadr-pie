@@ -41,7 +41,7 @@ Entonces copias el script a ese directorio bin/ en tu $HOME y ya podras ejecutar
  cualquier otro binario en tu /usr/local/bin, simplemente poniendo el nombre, si ejecutas
 sin argumento:
 
-	[yo@linux-box $] uploadr-pie
+	[yo@linux-box ]$ uploadr-pie
 
 Obtendras una ayuda del script(muy mal elaborada quizas x) como la siguiente:
 
