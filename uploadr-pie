@@ -39,14 +39,16 @@ elif [[ ! -f $1 ]];then
 		esac
 	fi
 
-        FILE=$1
+        FILE="$1"
         SIZE=$(stat "${FILE}" | grep -i size | cut -d" " -f4)
-        TYPE=$(echo "${FILE}" | cut -d"." -f2 | tr a-z A-Z)  
+        #TYPE=$(echo "${FILE}" | cut -d"." -f2 | tr a-z A-Z)  
+		EXT=$(echo "$FILE" | sed -e 's/.*\.//' | tr a-z A-Z)
 
-        echo -e "\e[1;33mFile\e[0m: $(basename "${FILE}")\t\e[1;33mSize\e[0m: $SIZE\t\e[1;33mType\e[0m: $TYPE\t\e[1;33mExpiration\e[0m: $EXPIRE\n"
+        echo -e "\e[1;33mFile\e[0m: $(basename "${FILE}")\t\e[1;33mSize\e[0m: $SIZE\t\e[1;33mExtension\e[0m: $EXT\t\e[1;33mExpiration\e[0m: $EXPIRE\n"
 
-        if [[ "$TYPE" != "PNG" && "$TYPE" != "JPG" && "$TYPE" != "GIF" && "$TYPE" != "PDF" && "$TYPE" != "TXT" ]];then
-              echo -e "El tipo de archivo $TYPE no es soportado por  uploadpie.com.\n"
+        if [[ "$EXT" != "PNG" && "$EXT" != "JPG" && "$EXT" != "GIF" && "$EXT" != "PDF" && "$EXT" != "TXT" ]];then
+              echo -e "El tipo de archivo  con extension $EXT no es soportado por  uploadpie.com.\n"
+			  echo -e "Las extensiones soportadas son: png, jpg, gif, pdf y txt."
         elif [[ "$SIZE" -gt "$MAX_FILE_SIZE" ]];then
               echo -e "El archivo es demasiado grande, uploadpie.com permite un maximo de 3 mb.\n"
         else
