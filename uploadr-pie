@@ -11,7 +11,13 @@ SCRIPT_NAME=$(basename "$0")
 
 if [[ "$#" -lt 1 ]];then
 	echo -e "\tUso: "$SCRIPT_NAME" mi_archivo.ext [DURACION]\n"
-	echo -e "\tDonde DURACION es un numero del 1 al 5 (1 por defecto):\n\t1 = 30 minutos\t2 = 1 Hora\t3 = 6 Horas\t4 = 1 Día\t5 = 1 Semana\n"
+	echo -e "\tDonde DURACION es un numero del 1 al 5 (1 por defecto):\n
+		1 = 30 minutos
+		2 = 1 Hora
+		3 = 6 Horas
+		4 = 1 Día
+		5 = 1 Semana\n"
+	echo -e "Las extensiones soportadas son: png, jpg, gif, pdf y txt\n." && exit 1
 elif [[ ! -f $1 ]];then
 	echo -e "\tEl archivo $(basename "$1") no es un archivo regular\n"    
 	else
@@ -40,18 +46,19 @@ elif [[ ! -f $1 ]];then
 	fi
 
         FILE="$1"
-        SIZE=$(stat "${FILE}" | grep -i size | cut -d" " -f4)
-        #TYPE=$(echo "${FILE}" | cut -d"." -f2 | tr a-z A-Z)  
+        SIZE=$(du --bytes "${FILE}" | awk '{print $1}')
 		EXT=$(echo "$FILE" | sed -e 's/.*\.//' | tr a-z A-Z)
 
         echo -e "\e[1;33mFile\e[0m: $(basename "${FILE}")\t\e[1;33mSize\e[0m: $SIZE\t\e[1;33mExtension\e[0m: $EXT\t\e[1;33mExpiration\e[0m: $EXPIRE\n"
 
         if [[ "$EXT" != "PNG" && "$EXT" != "JPG" && "$EXT" != "GIF" && "$EXT" != "PDF" && "$EXT" != "TXT" ]];then
               echo -e "El tipo de archivo  con extension $EXT no es soportado por  uploadpie.com.\n"
-			  echo -e "Las extensiones soportadas son: png, jpg, gif, pdf y txt."
+			  echo -e "Las extensiones soportadas son: png, jpg, gif, pdf y txt."i && exit 1
         elif [[ "$SIZE" -gt "$MAX_FILE_SIZE" ]];then
-              echo -e "El archivo es demasiado grande, uploadpie.com permite un maximo de 3 mb.\n"
+              echo -e "El archivo es demasiado grande, uploadpie.com permite un maximo de 3 mb.\n" && exit 1
         else
               curl --progress-bar -A "$USER_AGENT" --form uploadedfile=@"$FILE" --form upload=1 --form MAX_FILE_SIZE="$MAX_FILE_SIZE"  --form expire="$DURATION" http://uploadpie.com | grep 'id="uploaded"' | cut -d'"' -f6
         fi
 fi
+
+exit 0
