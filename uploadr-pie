@@ -7,8 +7,8 @@
 ###############################################################
 ##                                                           ##
 ## REQUIRED:                                                 ##		                                         
-##			curl - In order to upload files                  ##					 
-##			scrot - In order to take screeshot               ##				 
+##		curl - In order to upload files                      ##					 
+##      scrot - In order to take screeshot                   ##				 
 ##                                                           ##															 
 ###############################################################
 
