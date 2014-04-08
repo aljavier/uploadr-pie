@@ -110,7 +110,7 @@ elif [[ "$#" -eq 1 ]];then
 	fi
 elif [[ "$#" -eq 2 ]];then
    	if [[ ! -f "$1" ]];then
-	   echo -e "The argument provided \""$1"\" it not a regular file!\n" && exit 1
+	   echo -e "The argument provided \""$1"\" it's not a regular file!\n" && exit 1
    	fi
   
   # If the second parameter is not valid it will use the default duration
