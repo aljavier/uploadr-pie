@@ -3,62 +3,124 @@
 # Licensed under a BSD License
 # Created by A.J.
 
+
+###############################################################
+##															 ##
+## REQUIRED:		                                         ##
+##			curl - In order to upload files					 ##
+##			scrot - In order to take screeshot				 ##
+##															 ##
+###############################################################
+
+
+# Variables declarations 
 MAX_FILE_SIZE=3145728
+FILE=""
+IMG_DIR="/tmp/"
 DURATION=1
-EXPIRE="30 Minutos"
+EXPIRE="30 Minutes"
 USER_AGENT="Mozilla/5.0 (X11; Linux x86_64; rv:26.0) Gecko/20100101 Firefox/26.0"
 SCRIPT_NAME=$(basename "$0")
+# end
 
-if [[ "$#" -lt 1 ]];then
-	echo -e "\tUso: "$SCRIPT_NAME" mi_archivo.ext [DURACION]\n"
-	echo -e "\tDonde DURACION es un numero del 1 al 5 (1 por defecto):\n
-		1 = 30 minutos
-		2 = 1 Hora
-		3 = 6 Horas
-		4 = 1 Día
-		5 = 1 Semana\n"
-	echo -e "Las extensiones soportadas son: png, jpg, gif, pdf y txt\n." && exit 1
-elif [[ ! -f $1 ]];then
-	echo -e "\tEl archivo $(basename "$1") no es un archivo regular\n"    
-	else
-	if [[ "$#" -gt 1 && "$2" =~ ^-?[0-9]+$ ]];then
-		case $2 in
-			2)
-				DURATION=2      # Duracion del archivo = 1 hora
-				EXPIRE="1 Hora"
-				;;
-			3)
-				DURATION=3      # Duracion del archivo = 6 horas
-				EXPIRE="6 Horas"
-				;;
-			4)
-				DURATION=4      # Duracion del archivo = 1 dia
-				EXPIRE="1 Día"
-				;;
-			5)
-				DURATION=5      # Duracion del archivo = 1 semana
-				EXPIRE="1 Semana"
-				;;
-			*)
-				# No hago nada, pues DURACION=1 por defecto, dejo esto solo por convencion
-				;;
-		esac
-	fi
-
-        FILE="$1"
-        SIZE=$(du --bytes "${FILE}" | awk '{print $1}')
+# functions definition
+upload() {
+        SIZE_BYTES=$(du --bytes "${FILE}" | awk '{print $1}')
+		SIZE=$(du --human-readable "${FILE}" | awk '{print $1}')
 		EXT=$(echo "$FILE" | sed -e 's/.*\.//' | tr a-z A-Z)
 
-        echo -e "\e[1;33mFile\e[0m: $(basename "${FILE}")\t\e[1;33mSize\e[0m: $SIZE\t\e[1;33mExtension\e[0m: $EXT\t\e[1;33mExpiration\e[0m: $EXPIRE\n"
+		echo -e "\e[1;33mFile\e[0m: $(basename "${FILE}")\t\e[1;33mSize\e[0m: $SIZE\t\e[1;33m\e[1;33mExpirate\e[0m: $EXPIRE\n"	
 
         if [[ "$EXT" != "PNG" && "$EXT" != "JPG" && "$EXT" != "GIF" && "$EXT" != "PDF" && "$EXT" != "TXT" ]];then
-              echo -e "El tipo de archivo  con extension $EXT no es soportado por  uploadpie.com.\n"
-			  echo -e "Las extensiones soportadas son: png, jpg, gif, pdf y txt."i && exit 1
-        elif [[ "$SIZE" -gt "$MAX_FILE_SIZE" ]];then
-              echo -e "El archivo es demasiado grande, uploadpie.com permite un maximo de 3 mb.\n" && exit 1
+              echo -e "The file  with extension $EXT is currently not supported by uploadpie.com.\n"
+			  echo -e "The supported extensions are: png, jpg, gif, pdf y txt." && exit 1
+        elif [[ "$SIZE_BYTES" -gt "$MAX_FILE_SIZE" ]];then
+              echo -e "The file is too big, uploadpie.com supports file only up to 3 mb.\n" && exit 1
         else
-              curl --progress-bar -A "$USER_AGENT" --form uploadedfile=@"$FILE" --form upload=1 --form MAX_FILE_SIZE="$MAX_FILE_SIZE"  --form expire="$DURATION" http://uploadpie.com | grep 'id="uploaded"' | cut -d'"' -f6
+              curl --progress-bar -A "$USER_AGENT" --form uploadedfile=@"$FILE" --form upload=1\
+					  --form MAX_FILE_SIZE="$MAX_FILE_SIZE"  --form expire="$DURATION" http://uploadpie.com\
+					  | grep 'id="uploaded"' | cut -d'"' -f6
         fi
-fi
+}
 
+set_duration() {
+		case "$1" in
+					2)
+						DURATION=2      # File expiration = 1 hour
+						EXPIRE="1 Hour"
+						;;
+					3)
+						DURATION=3      # File expiration = 6 hours
+						EXPIRE="6 Hours"
+						;;
+					4)
+						DURATION=4      # File experation = 1 Day
+						EXPIRE="1 Day"
+						;;
+					5)
+						DURATION=5      # File expiration = 1 Week
+						EXPIRE="1 Week"
+						;;
+					*)
+						# Do nothing. It will use the default time, 30 minutes.
+						;;
+				esac
+
+}
+
+take_screenshot() {
+	FILE="$IMG_DIR"
+	FILE+=$(date +"%Y-%m-%d-%T")
+	FILE+="-screenshot.png"
+	scrot -d 5 -c "$FILE"
+}
+
+usage() {
+	echo -e "\tUsage: "$SCRIPT_NAME" my_file.ext [DURATION]\n"
+	echo -e "\tWhere DURATION is a number from 1 to 5 (1 by default):\n
+		1 = 30 minutes
+		2 = 1 Hour
+		3 = 6 Hours
+		4 = 1 Day
+		5 = 1 Week\n"
+	echo -e "\tThe supported extensions are: png, jpg, gif, pdf y txt.\n" 
+	echo -e "\tAlso you can use it like this:\t$SCRIPT_NAME [DURATION]\n"
+	echo -e "\tYou must have scrot installed, then $SCRIPT_NAME will make 
+	a screenshot and upload it, you can also set a duration."
+}
+# end
+
+if [[ "$#" -eq 0 ]];then
+	take_screenshot
+	upload
+elif [[ "$#" -eq 1 ]];then
+	if [[ "$1" == "--help" || "$1" == "-h" ]];then
+		usage
+	elif [[ -f "$1" ]];then
+		FILE="$1"
+		upload
+	elif [[ ! -f "$1" ]];then
+		take_screenshot
+		if [[ "$1"  =~ ^[0-9]+$ ]];then		
+			set_duration "$1"
+			upload
+		else
+	    	usage;exit 1
+		fi
+	fi
+elif [[ "$#" -eq 2 ]];then
+   	if [[ ! -f "$1" ]];then
+	   echo -e "The argument provided \""$1"\" it not a regular file!\n" && exit 1
+   	fi
+  
+  # If the second parameter is not valid it will use the default duration
+  	if [[ "$2"  =~ ^[0-9]+$ ]];then		
+   		set_duration "$2"
+   	fi	
+   		FILE="$1"
+   		upload
+else
+	usage
+fi
 exit 0
+
